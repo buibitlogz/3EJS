@@ -66,12 +66,13 @@ export default function ClawbackPage() {
 
       if (!dateInstalled || isNaN(dateInstalled.getTime())) return false;
 
-      // Show records installed within the last X days (30/60/90) and not yet loaded
+      // Show records installed within the last X days (30/60/90)
+      // AND notified but still not loaded
       const isWithinDays = dateInstalled >= daysAgo;
+      const isNotified = sub.notifyStatus === 'Notified';
       const isNotLoaded = sub.loadStatus !== 'Account Loaded';
-      const isNotNotified = sub.notifyStatus === 'Not Yet Notified';
       
-      return isWithinDays && isNotLoaded && isNotNotified;
+      return isWithinDays && isNotified && isNotLoaded;
     });
   }, [subscribers, daysFilter]);
 
@@ -204,10 +205,15 @@ export default function ClawbackPage() {
                         <th className="px-5 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider whitespace-nowrap">Date Installed</th>
                         <th className="px-5 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider whitespace-nowrap">Address</th>
                         <th className="px-5 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider whitespace-nowrap">Contact</th>
+                        <th className="px-5 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider whitespace-nowrap">Notified</th>
+                        <th className="px-5 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider whitespace-nowrap">Loaded</th>
                       </tr>
                     </thead>
                     <tbody>
 {paginatedSubscribers.map((sub) => {
+                        const isNotified = sub.notifyStatus === 'Notified';
+                        const isLoaded = sub.loadStatus === 'Account Loaded';
+                        
                         return (
                           <tr
                             key={sub.id}
@@ -219,6 +225,38 @@ export default function ClawbackPage() {
                             <td className="px-5 py-3 text-sm text-text/70 whitespace-nowrap">{formatDateDisplay(sub.dateInstalled)}</td>
                             <td className="px-5 py-3 text-sm text-text/70">{sub.address || ''}</td>
                             <td className="px-5 py-3 text-sm text-text/70">{sub.contactNumber1 || '-'}</td>
+                            <td className="px-5 py-3 text-sm whitespace-nowrap">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                isNotified ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'
+                              }`}>
+                                {isNotified ? (
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01" />
+                                  </svg>
+                                )}
+                                {isNotified ? 'Notified' : 'Not Notified'}
+                              </span>
+                            </td>
+                            <td className="px-5 py-3 text-sm whitespace-nowrap">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                isLoaded ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'
+                              }`}>
+                                {isLoaded ? (
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01" />
+                                  </svg>
+                                )}
+                                {isLoaded ? 'Loaded' : 'Not Loaded'}
+                              </span>
+                            </td>
                           </tr>
                         );
                       })}
