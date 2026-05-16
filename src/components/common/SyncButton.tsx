@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { syncFromRemote } from '@/lib/database';
+import { syncFromRemote } from '@/lib/unified-db';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const SyncButton: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [showCheck, setShowCheck] = useState(false);
 
-const handleSync = useCallback(async () => {
+  const handleSync = useCallback(async () => {
     if (isSyncing) return;
 
     setIsSyncing(true);
@@ -29,43 +29,40 @@ const handleSync = useCallback(async () => {
     <motion.button
       onClick={handleSync}
       disabled={isSyncing}
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
       whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.9 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className={`fixed top-6 right-6 z-50 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
+      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
         isSyncing
-          ? 'bg-primary/80 cursor-not-allowed'
+          ? 'bg-primary/50 cursor-not-allowed text-white/70'
           : showCheck
-          ? 'bg-green-500'
-          : 'bg-primary hover:shadow-xl hover:shadow-primary/30'
+          ? 'bg-green-500 text-white'
+          : 'bg-gradient-to-br from-primary to-secondary text-white hover:shadow-lg hover:shadow-primary/40'
       }`}
-      title="Sync from database"
     >
       <AnimatePresence mode="wait">
         {isSyncing ? (
           <motion.svg
             key="spinner"
-            className="w-5 h-5 text-white"
+            className="w-5 h-5"
             fill="none"
             viewBox="0 0 24 24"
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
           >
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+            <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </motion.svg>
         ) : showCheck ? (
           <motion.svg
             key="check"
-            className="w-5 h-5 text-white"
+            className="w-5 h-5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth="3"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
+            initial={{ scale: 0, rotate: -45 }}
+            animate={{ scale: 1, rotate: 0 }}
             exit={{ scale: 0 }}
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -73,16 +70,15 @@ const handleSync = useCallback(async () => {
         ) : (
           <motion.svg
             key="sync"
-            className="w-5 h-5 text-white"
+            className="w-5 h-5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth="2"
-            animate={{ rotate: 0 }}
             whileHover={{ rotate: 180 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2h3.062M20 20v-5h-.582m-15.356-2H8.562A9.963 9.963 0 004 12c0 5.523 4.477 10 10 10s10-4.477 10-10-4.477-10-10-10z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
           </motion.svg>
         )}
       </AnimatePresence>

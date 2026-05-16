@@ -59,17 +59,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
     }
 
-    // Try Supabase first
     if (!isSupabaseConfigured()) {
       return NextResponse.json({ error: 'Authentication service not available' }, { status: 503 });
     }
 
     const { data, error } = await supabaseFetch<{ id: string; username: string; password: string; role: string; createdat?: string }>('users', {
-      params: { username: `eq.${username}`, select: 'id,username,password,role,createdat', limit: '1' },
+      params: { username: `eq.${username}`, select: 'id,username,password,role,createdat' },
     });
 
     if (error) {
-      console.error('[Login] Supabase query error:', error.message);
       recordFailedAttempt(clientIp);
       return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
     }

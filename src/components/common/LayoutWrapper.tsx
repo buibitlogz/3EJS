@@ -3,7 +3,6 @@
 import React from 'react';
 import { Sidebar } from '@/components/common/Sidebar';
 import { MobileNav } from '@/components/common/MobileNav';
-import { SyncButton } from '@/components/common/SyncButton';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -43,7 +42,6 @@ export const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children, requireA
 
   return (
     <div className="min-h-screen bg-background">
-      <SyncButton />
       <MobileNav />
       <div className="flex">
         {isAuthenticated && (

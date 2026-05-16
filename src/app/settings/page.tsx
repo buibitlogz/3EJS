@@ -34,8 +34,8 @@ export default function SettingsPage() {
 
   const handleSaveUser = async () => {
     if (!userForm.username.trim()) return;
-    if (!editingUser && userForm.role !== UserRole.VIEW_ONLY && !userForm.password.trim()) {
-      alert('Password is required for this role');
+    if (!userForm.password.trim()) {
+      alert('Password is required');
       return;
     }
     setShowUserModal(false);
@@ -393,20 +393,18 @@ export default function SettingsPage() {
                             className="w-full px-4 py-3 rounded-xl bg-background border border-border text-text"
                           />
                         </div>
-                        {userForm.role !== UserRole.VIEW_ONLY && (
-                          <div>
-                            <label className="block text-sm font-medium text-text/70 mb-1">
-                              Password {!editingUser && <span className="text-red-400">*</span>}
-                            </label>
-                            <input
-                              type="password"
-                              value={userForm.password}
-                              onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
-                              className="w-full px-4 py-3 rounded-xl bg-background border border-border text-text"
-                              placeholder={editingUser ? 'Leave blank to keep current' : ''}
-                            />
-                          </div>
-                        )}
+                        <div>
+                          <label className="block text-sm font-medium text-text/70 mb-1">
+                            Password {!editingUser && <span className="text-red-400">*</span>}
+                          </label>
+                          <input
+                            type="password"
+                            value={userForm.password}
+                            onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                            className="w-full px-4 py-3 rounded-xl bg-background border border-border text-text"
+                            placeholder={editingUser ? 'Leave blank to keep current' : ''}
+                          />
+                        </div>
                         <div>
                           <label className="block text-sm font-medium text-text/70 mb-1">Role</label>
                           <select

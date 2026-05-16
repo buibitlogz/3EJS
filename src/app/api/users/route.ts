@@ -44,6 +44,8 @@ export async function POST(request: NextRequest) {
     }
 
     const hashedPassword = await hashPasswordIfNeeded(data.password);
+    console.log('[CreateUser] Password hashed:', hashedPassword?.substring(0, 15) + '...');
+
     const row = {
       id: data.username,
       username: data.username,

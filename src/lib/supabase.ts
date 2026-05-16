@@ -43,8 +43,12 @@ export async function supabaseFetch<T>(
     }
     if (!id) {
       url += `?${searchParams.toString()}`;
+    } else {
+      url += '&' + searchParams.toString();
     }
   }
+
+  console.log('[SupabaseFetch] URL:', method, url);
 
   const headers: Record<string, string> = {
     'apikey': SUPABASE_ANON_KEY,

@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { SyncProvider } from "@/components/sync/SyncProvider";
 import { DataProvider } from "@/context/DataProvider";
 import { DataLoader } from "@/components/common/DataLoader";
+import { ClientRipple } from "@/components/common/ClientRipple";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,9 +45,11 @@ export default function RootLayout({
           <DataProvider>
             <AuthProvider>
               <SyncProvider>
-                <DataLoader>
-                  {children}
-                </DataLoader>
+                <ClientRipple>
+                  <DataLoader>
+                    {children}
+                  </DataLoader>
+                </ClientRipple>
               </SyncProvider>
             </AuthProvider>
           </DataProvider>
