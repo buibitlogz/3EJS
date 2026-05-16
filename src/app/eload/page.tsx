@@ -363,7 +363,7 @@ export default function ELoadPage() {
               className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-border"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-white">
+              <div className="bg-gradient-to-r from-primary to-secondary p-5 text-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
@@ -467,7 +467,7 @@ setFormData({
               className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-border"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-white">
+              <div className="bg-gradient-to-r from-primary to-secondary p-5 text-white">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold">{editingTransaction ? 'Edit Transaction' : 'Add E-Load'}</h3>
                   <button onClick={() => { setShowForm(false); setEditingTransaction(null); setRefDuplicateError(''); }} className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center hover:bg-white/30">
