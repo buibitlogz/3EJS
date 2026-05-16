@@ -26,6 +26,17 @@ export default function ClawbackPage() {
     fetchSubscribers();
   }, [fetchSubscribers]);
 
+  // Re-fetch when db-synced event fires (from SyncProvider)
+  useEffect(() => {
+    const handleSync = () => {
+      fetchSubscribers();
+    };
+    window.addEventListener('db-synced', handleSync);
+    return () => {
+      window.removeEventListener('db-synced', handleSync);
+    };
+  }, [fetchSubscribers]);
+
   const clawbackSubscribers = useMemo(() => {
     const now = new Date();
     const daysAgo = new Date();
