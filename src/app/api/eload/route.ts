@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllEload, createEload, deleteEload, updateEload } from '@/lib/unified-db';
+import { getAllEload, createEload, deleteEload, updateEload, checkAndUpdateInstallationForLoad } from '@/lib/unified-db';
 import { validateELoadTransaction } from '@/lib/validation';
 
 export async function GET() {
@@ -20,16 +20,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    const { gcashAcct, accountNo, time, timeLoaded, markedUp, ...rest } = data;
+    const { gcashAcct, accountNo, time, timeLoaded, markedUp, createdAt, ...rest } = data;
     const eloadData = {
       gcashHandler: gcashAcct,
       accountNumber: accountNo,
       timeLoaded: time || timeLoaded,
       markup: markedUp,
+      createdAt,
       ...rest,
     };
 
     const eload = await createEload(eloadData);
+    
+    if (accountNo) {
+      const loadCreatedAt = createdAt || new Date().toISOString();
+      await checkAndUpdateInstallationForLoad(accountNo, loadCreatedAt);
+    }
+    
     return NextResponse.json(eload, { status: 201 });
   } catch (error) {
     console.error('Error creating E-Load transaction:', error);

@@ -26,7 +26,14 @@ export default function ClawbackPage() {
     fetchSubscribers();
   }, [fetchSubscribers]);
 
-  // Re-fetch when db-synced event fires (from SyncProvider)
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchSubscribers();
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [fetchSubscribers]);
+
   useEffect(() => {
     const handleSync = () => {
       fetchSubscribers();
@@ -66,13 +73,12 @@ export default function ClawbackPage() {
 
       if (!dateInstalled || isNaN(dateInstalled.getTime())) return false;
 
-      // Show records installed within the last X days (30/60/90)
-      // AND notified but still not loaded
       const isWithinDays = dateInstalled >= daysAgo;
+      const isNotNeeded = sub.notifyStatus === 'Not Needed';
       const isNotified = sub.notifyStatus === 'Notified';
       const isNotLoaded = sub.loadStatus !== 'Account Loaded';
       
-      return isWithinDays && isNotified && isNotLoaded;
+      return isWithinDays && !isNotNeeded && (isNotified || sub.notifyStatus === 'Not Yet Notified') && isNotLoaded;
     });
   }, [subscribers, daysFilter]);
 
@@ -141,31 +147,40 @@ export default function ClawbackPage() {
       <PageContainer title="Clawback Dashboard" subtitle={`${filteredSubscribers.length} subscribers risk for clawback`}>
         <div className="space-y-6">
           <Card>
-            <div className="flex flex-col md:flex-row justify-between gap-4">
-              <div className="flex-1 relative">
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search by name, account, or phone..."
-                  value={searchTerm}
-                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-background border border-border text-text placeholder-text/30 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <select
-                  value={daysFilter}
-                  onChange={(e) => { setDaysFilter(Number(e.target.value) as 30 | 60 | 90); setCurrentPage(1); }}
-                  className="px-4 py-2 rounded-lg bg-background border border-border text-text focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm font-medium"
-                >
-                  <option value={30}>Last 30 Days</option>
-                  <option value={60}>Last 60 Days</option>
-                  <option value={90}>Last 90 Days</option>
-                </select>
-              </div>
-            </div>
+<div className="flex flex-col md:flex-row justify-between gap-4">
+               <div className="flex-1 relative">
+                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                 </svg>
+                 <input
+                   type="text"
+                   placeholder="Search by name, account, or phone..."
+                   value={searchTerm}
+                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                   className="w-full pl-12 pr-4 py-3 rounded-xl bg-background border border-border text-text placeholder-text/30 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                 />
+               </div>
+               <div className="flex items-center gap-3">
+                 <button
+                   onClick={() => fetchSubscribers()}
+                   className="px-4 py-2 rounded-lg bg-background border border-border text-text hover:bg-primary/5 transition-colors text-sm font-medium flex items-center gap-2"
+                 >
+                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                   </svg>
+                   Refresh
+                 </button>
+                 <select
+                   value={daysFilter}
+                   onChange={(e) => { setDaysFilter(Number(e.target.value) as 30 | 60 | 90); setCurrentPage(1); }}
+                   className="px-4 py-2 rounded-lg bg-background border border-border text-text focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm font-medium"
+                 >
+                   <option value={30}>Last 30 Days</option>
+                   <option value={60}>Last 60 Days</option>
+                   <option value={90}>Last 90 Days</option>
+                 </select>
+               </div>
+             </div>
           </Card>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -213,6 +228,7 @@ export default function ClawbackPage() {
 {paginatedSubscribers.map((sub) => {
                         const isNotified = sub.notifyStatus === 'Notified';
                         const isLoaded = sub.loadStatus === 'Account Loaded';
+                        const isNotNeeded = sub.notifyStatus === 'Not Needed';
                         
                         return (
                           <tr
@@ -227,9 +243,14 @@ export default function ClawbackPage() {
                             <td className="px-5 py-3 text-sm text-text/70">{sub.contactNumber1 || '-'}</td>
                             <td className="px-5 py-3 text-sm whitespace-nowrap">
                               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                isNotNeeded ? 'bg-blue-500/10 text-blue-600 animate-pulse' :
                                 isNotified ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'
                               }`}>
-                                {isNotified ? (
+                                {isNotNeeded ? (
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                  </svg>
+                                ) : isNotified ? (
                                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                   </svg>
@@ -238,7 +259,7 @@ export default function ClawbackPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01" />
                                   </svg>
                                 )}
-                                {isNotified ? 'Notified' : 'Not Notified'}
+                                {isNotNeeded ? 'Not Needed' : isNotified ? 'Notified' : 'Not Notified'}
                               </span>
                             </td>
                             <td className="px-5 py-3 text-sm whitespace-nowrap">
@@ -327,22 +348,25 @@ export default function ClawbackPage() {
                       <p className="text-xs text-text/50">Address</p>
                       <p className="font-medium text-text">{selectedSubscriber.address || '-'}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-text/50">Notify Status</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className={`text-sm font-medium ${
-                          selectedSubscriber.notifyStatus === 'Not Yet Notified' ? 'text-red-600' : 'text-emerald-600'
-                        }`}>
-                          {selectedSubscriber.notifyStatus || '-'}
-                        </p>
-                        <button
-                          onClick={() => setConfirmNotify(true)}
-                          className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-primary/5 transition-colors"
-                        >
-                          {selectedSubscriber.notifyStatus === 'Not Yet Notified' ? 'Mark as Notified' : 'Mark as Not Yet Notified'}
-                        </button>
-                      </div>
-                    </div>
+<div>
+                       <p className="text-xs text-text/50">Notify Status</p>
+                       <div className="flex items-center gap-2 mt-1">
+                         <p className={`text-sm font-medium ${
+                           selectedSubscriber.notifyStatus === 'Not Yet Notified' ? 'text-red-600' :
+                           selectedSubscriber.notifyStatus === 'Not Needed' ? 'text-blue-600' : 'text-emerald-600'
+                         }`}>
+                           {selectedSubscriber.notifyStatus || '-'}
+                         </p>
+                         {selectedSubscriber.notifyStatus !== 'Not Needed' && (
+                           <button
+                             onClick={() => setConfirmNotify(true)}
+                             className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-primary/5 transition-colors"
+                           >
+                             {selectedSubscriber.notifyStatus === 'Not Yet Notified' ? 'Mark as Notified' : 'Mark as Not Yet Notified'}
+                           </button>
+                         )}
+                       </div>
+                     </div>
                     <div>
                       <p className="text-xs text-text/50">Load Status</p>
                       <div className="flex items-center gap-2 mt-1">

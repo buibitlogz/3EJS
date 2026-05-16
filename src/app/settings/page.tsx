@@ -18,6 +18,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('themes');
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState('');
+  const [archiving, setArchiving] = useState(false);
 
   const { users, fetchUsers, addUser, updateUser, deleteUser, isSubmitting } = useUsersStore();
   const [showUserModal, setShowUserModal] = useState(false);
@@ -59,6 +60,33 @@ export default function SettingsPage() {
       setSyncMsg('Sync failed: ' + (e instanceof Error ? e.message : 'Unknown error'));
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleArchivePreviousYears = async () => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    
+    if (!confirm(`Archive all installations from years before ${currentYear}? This will move them to historical data.`)) {
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/archive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentYear }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        alert(`Successfully archived ${result.archivedCount} installations from years before ${currentYear}`);
+      } else {
+        alert('Archive failed: ' + (result.error || 'Unknown error'));
+      }
+    } catch (e) {
+      alert('Archive failed: ' + (e instanceof Error ? e.message : 'Unknown error'));
     }
   };
 
@@ -147,6 +175,42 @@ export default function SettingsPage() {
                 {syncMsg && (
                   <p className="mt-3 text-sm text-text/50">{syncMsg}</p>
                 )}
+              </Card>
+
+              <Card className="p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-text">Archive Previous Years</h2>
+                    <p className="text-sm text-text/50">Move old installations to historical data</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleArchivePreviousYears}
+                  disabled={archiving}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white font-medium hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {archiving ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Archiving...
+                    </span>
+                  ) : (
+                    'Archive Previous Years'
+                  )}
+                </button>
+
+                <p className="mt-3 text-sm text-text/50">
+                  This will move all installations from years before {new Date().getFullYear()} to the historical data table.
+                </p>
               </Card>
 
               <ThemeCustomizer />

@@ -164,12 +164,25 @@ CREATE INDEX idx_installations_jonumber ON installations(jonumber);
 CREATE INDEX idx_installations_accountnumber ON installations(accountnumber);
 CREATE INDEX idx_installations_subsname ON installations(subsname);
 CREATE INDEX idx_installations_technician ON installations(technician);
+CREATE INDEX idx_installations_notifstatus ON installations(notifstatus);
+CREATE INDEX idx_installations_loadstatus ON installations(loadstatus);
 
 CREATE INDEX idx_eload_accountnumber ON eload(accountnumber);
 CREATE INDEX idx_eload_dateloaded ON eload(dateloaded);
 CREATE INDEX idx_eload_gcashreference ON eload(gcashreference);
 
 CREATE INDEX idx_users_username ON users(username);
+
+-- =====================================================
+-- Note: notifyStatus (notifstatus) accepts these values:
+-- 'Not Yet Notified' - Subscriber has not been notified
+-- 'Notified' - Subscriber has been notified
+-- 'Not Needed' - Subscriber has loaded (auto-set when E-Load is created)
+--
+-- loadStatus accepts these values:
+-- 'Not yet Loaded' - Subscriber has not loaded
+-- 'Account Loaded' - Subscriber has loaded (auto-set when E-Load is created)
+-- =====================================================
 
 -- =====================================================
 -- Admin User — Password: admin123

@@ -626,4 +626,113 @@ export async function syncFromRemote(): Promise<void> {
   }
 }
 
+export async function checkAndUpdateInstallationForLoad(accountNumber: string, createdAt: string): Promise<void> {
+  try {
+    const installations = await getAllInstallations();
+    const installation = installations.find(inst => inst.accountNumber === accountNumber);
+    
+    if (installation && installation.loadStatus !== 'Account Loaded') {
+      const updates: Partial<InstallationRow> = {
+        loadStatus: 'Account Loaded',
+      };
+      
+      if (installation.notifyStatus === 'Not Yet Notified') {
+        updates.notifyStatus = 'Not Needed';
+      }
+      
+      await updateInstallation(installation.id, updates);
+      console.log(`[Auto-Load] Account ${accountNumber} marked as loaded, notifyStatus: ${updates.notifyStatus || installation.notifyStatus}`);
+    }
+  } catch (error) {
+    console.error('[Auto-Load] Failed to check/update installation:', error);
+  }
+}
+
+export async function archivePreviousYears(currentYear: number): Promise<number> {
+  try {
+    const installations = await getAllInstallations();
+    const toArchive = installations.filter(inst => {
+      const year = parseInt(String(inst.yearInstalled || ''));
+      return !isNaN(year) && year < currentYear;
+    });
+    
+    if (toArchive.length === 0) {
+      return 0;
+    }
+    
+    const historicalRecords: HistoricalDataRow[] = toArchive.map(inst => ({
+      id: inst.id,
+      dateInstalled: inst.dateInstalled,
+      joNumber: inst.joNumber,
+      accountNumber: inst.accountNumber,
+      subscriberName: inst.subscriberName,
+      address: inst.address,
+      contactNumber1: inst.contactNumber1,
+      contactNumber2: inst.contactNumber2,
+      assignedTechnician: inst.assignedTechnician,
+      modemSerial: inst.modemSerial,
+      port: inst.port,
+      napBoxLonglat: '',
+      fiberOpticCable: inst.fiberOpticCable,
+      mechanicalConnector: inst.mechanicalConnector,
+      sClamp: inst.sClamp,
+      patchcordApsc: inst.patchcordApsc,
+      houseBracket: inst.houseBracket,
+      midspan: inst.midspan,
+      cableClip: inst.cableClip,
+      ftthTerminalBox: inst.ftthTerminalBox,
+      doubleSidedTape: inst.doubleSidedTape,
+      cableTieWrap: inst.cableTieWrap,
+      gcashHandler: '',
+      gcashReference: '',
+      timeLoaded: '',
+      amount: 0,
+      markup: 0,
+      incentive: 0,
+      retailer: 0,
+      dealer: 0,
+      remarks: '',
+      createdAt: inst.createdAt,
+      updatedAt: inst.updatedAt,
+    }));
+    
+    if (useSupabase()) {
+      try {
+        for (const record of historicalRecords) {
+          const sbData = fromCamelCase(record as unknown as Record<string, unknown>, HISTORICALDATA_COLUMNS_SB);
+          await supabaseFetch('historicaldata', {
+            method: 'POST',
+            body: sbData,
+          });
+          
+          await supabaseFetch('installations', {
+            method: 'DELETE',
+            params: { id: `eq.${record.id}` },
+          });
+        }
+      } catch (error) {
+        console.warn('[Archive] Supabase archive failed:', error);
+        throw error;
+      }
+    }
+    
+    if (typeof window !== 'undefined' && window.indexedDB) {
+      try {
+        await localDb.putBatch('historicaldata', historicalRecords);
+        for (const record of historicalRecords) {
+          await localDb.remove('installations', record.id);
+        }
+      } catch (error) {
+        console.warn('[Archive] IndexedDB archive failed:', error);
+      }
+    }
+    
+    console.log(`[Archive] Archived ${toArchive.length} installations from years before ${currentYear}`);
+    return toArchive.length;
+  } catch (error) {
+    console.error('[Archive] Failed to archive previous years:', error);
+    throw error;
+  }
+}
+
 export { localDb };

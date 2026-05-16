@@ -58,7 +58,7 @@ export interface Installation {
   assignedTech?: string;
   createdAt?: string;
   updatedAt?: string;
-  notifyStatus?: 'Not Yet Notified' | 'Notified';
+  notifyStatus?: 'Not Yet Notified' | 'Notified' | 'Not Needed';
   loadStatus?: 'Not yet Loaded' | 'Account Loaded';
 }
 
