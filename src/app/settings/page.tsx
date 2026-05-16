@@ -19,6 +19,7 @@ export default function SettingsPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState('');
   const [archiving, setArchiving] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const { users, fetchUsers, addUser, updateUser, deleteUser, isSubmitting } = useUsersStore();
   const [showUserModal, setShowUserModal] = useState(false);
@@ -60,6 +61,34 @@ export default function SettingsPage() {
       setSyncMsg('Sync failed: ' + (e instanceof Error ? e.message : 'Unknown error'));
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleClearLocalDB = async () => {
+    const ok = confirm('WARNING: This will delete ALL local data from your browser. You will need to re-sync from Supabase. Continue?');
+    if (!ok) return;
+    
+    setClearing(true);
+    try {
+      if (!window.indexedDB) {
+        alert('IndexedDB is not available in this browser.');
+        return;
+      }
+      
+      const request = window.indexedDB.deleteDatabase('3jes_local_db');
+      
+      request.onerror = () => {
+        alert('Failed to delete local database. You may need to manually clear it from browser settings.');
+        setClearing(false);
+      };
+      
+      request.onsuccess = async () => {
+        alert('Local database deleted successfully. Please reload the page to re-sync from Supabase.');
+        window.location.reload();
+      };
+    } catch (e) {
+      alert('Error: ' + (e instanceof Error ? e.message : 'Unknown error'));
+      setClearing(false);
     }
   };
 
@@ -210,6 +239,42 @@ export default function SettingsPage() {
 
                 <p className="mt-3 text-sm text-text/50">
                   This will move all installations from years before {new Date().getFullYear()} to the historical data table.
+                </p>
+              </Card>
+
+              <Card className="p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-text">Clear Local Database</h2>
+                    <p className="text-sm text-text/50">Delete all local data and re-sync from Supabase</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleClearLocalDB}
+                  disabled={clearing}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-600 text-white font-medium hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {clearing ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Clearing...
+                    </span>
+                  ) : (
+                    'Clear Local Database'
+                  )}
+                </button>
+
+                <p className="mt-3 text-sm text-text/50">
+                  This will permanently delete all local data from your browser. The app will reload and fetch fresh data from Supabase.
                 </p>
               </Card>
 
