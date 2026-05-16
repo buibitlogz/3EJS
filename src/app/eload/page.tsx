@@ -514,17 +514,6 @@ setFormData({
                     </select>
                   </div>
                 </div>
-                {/* Auto-computed read-only fields */}
-                <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-background border border-border">
-                  <div>
-                    <p className="text-xs text-text/40 uppercase tracking-wider mb-1">Marked Up</p>
-                    <p className="font-semibold text-blue-600">₱{formData.markedUp}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-text/40 uppercase tracking-wider mb-1">Incentive</p>
-                    <p className="font-bold text-purple-600">₱{formData.incentive}</p>
-                  </div>
-                </div>
                 <div>
                   <label className="block text-xs font-medium text-text/50 uppercase tracking-wider mb-1">Remarks</label>
                   <input type="text" value={formData.remarks} onChange={(e) => setFormData({ ...formData, remarks: e.target.value })} className="w-full px-3 py-2.5 rounded-xl bg-background border border-border text-text focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="e.g. TOPER" />
