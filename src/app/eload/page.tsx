@@ -31,14 +31,11 @@ const AMOUNT_LABELS: Record<number, string> = {
 };
 
 const eloadColumns: ColumnDef<ELoadTransaction>[] = [
-  { key: 'gcashAcct', label: 'GCash Account', sortable: true, sortValue: (r) => r.gcashAcct || '', render: (r) => r.gcashAcct || '-', className: 'text-left whitespace-nowrap font-mono' },
+  { key: 'gcashAcct', label: 'Service', sortable: true, sortValue: (r) => r.gcashAcct || '', render: (r) => r.gcashAcct || '-', className: 'text-left whitespace-nowrap font-mono' },
   { key: 'dateLoaded', label: 'Date', sortable: true, sortValue: (r) => r.dateLoaded || '', render: (r) => formatDateDisplay(r.dateLoaded || ''), className: 'text-left whitespace-nowrap' },
   { key: 'amount', label: 'Amount', sortable: true, sortValue: (r) => String(r.amount || 0), render: (r) => <span className="font-semibold text-emerald-600">₱{(r.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>, className: 'text-left whitespace-nowrap' },
+  { key: 'gcashReference', label: 'GCash Reference', sortable: true, sortValue: (r) => r.gcashReference || '', render: (r) => r.gcashReference || '-', className: 'text-left whitespace-nowrap font-mono text-xs' },
   { key: 'accountNo', label: 'Account', sortable: true, sortValue: (r) => r.accountNo || '', render: (r) => r.accountNo || '-', className: 'text-left whitespace-nowrap' },
-  { key: 'markedUp', label: 'Marked Up', sortable: true, sortValue: (r) => String(r.markedUp ?? 0), render: (r) => r.markedUp !== undefined ? <span className="text-blue-600">₱{(r.markedUp || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> : '-', className: 'text-left whitespace-nowrap' },
-  { key: 'incentive', label: 'Incentive', sortable: true, sortValue: (r) => String(r.incentive ?? 0), render: (r) => r.incentive !== undefined ? <span className="text-purple-600 font-semibold">₱{(r.incentive || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> : '-', className: 'text-left whitespace-nowrap' },
-  { key: 'retailer', label: 'Retailer', sortable: true, sortValue: (r) => String(r.retailer ?? 0), render: (r) => r.retailer !== undefined ? <span className="text-orange-600">₱{(r.retailer || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> : '-', className: 'text-left whitespace-nowrap' },
-  { key: 'dealer', label: 'Dealer', sortable: true, sortValue: (r) => String(r.dealer ?? 0), render: (r) => r.dealer !== undefined ? <span className="text-teal-600">₱{(r.dealer || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> : '-', className: 'text-left whitespace-nowrap' },
   { key: 'remarks', label: 'Remarks', sortable: true, sortValue: (r) => r.remarks || '', render: (r) => r.remarks || '-', className: 'text-left whitespace-nowrap' },
 ];
 

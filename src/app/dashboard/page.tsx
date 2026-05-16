@@ -102,7 +102,7 @@ export default function DashboardPage() {
   }, [installations]);
 
   const clawbackSubscribers = useMemo(() => {
-    const daysFilter = 60;
+    const daysFilter = 90;
     const daysAgo = new Date();
     daysAgo.setDate(daysAgo.getDate() - daysFilter);
 
@@ -133,10 +133,10 @@ export default function DashboardPage() {
 
       const isWithinDays = dateInstalled >= daysAgo;
       const isNotNeeded = sub.notifyStatus === 'Not Needed';
-      const isNotified = sub.notifyStatus === 'Notified' || sub.notifyStatus === 'Not Yet Notified';
+      const isNotified = sub.notifyStatus === 'Notified';
       const isNotLoaded = sub.loadStatus !== 'Account Loaded';
 
-      return isWithinDays && !isNotNeeded && isNotified && isNotLoaded;
+      return isWithinDays && !isNotNeeded && (isNotified || sub.notifyStatus === 'Not Yet Notified') && isNotLoaded;
     }).slice(0, 20);
   }, [installations]);
 
@@ -306,7 +306,8 @@ export default function DashboardPage() {
                   <thead className="sticky top-0 bg-surface">
                     <tr className="text-left text-text/40 border-b border-border">
                       <th className="pb-2 font-medium">Account #</th>
-                      <th className="pb-2 font-medium">Contact</th>
+                      <th className="pb-2 font-medium">Loaded by</th>
+                      <th className="pb-2 font-medium">GCash Reference</th>
                       <th className="pb-2 font-medium text-right">Amount</th>
                     </tr>
                   </thead>
@@ -315,12 +316,13 @@ export default function DashboardPage() {
                       <tr key={t.id || i} className="border-b border-border/30 hover:bg-primary/5">
                         <td className="py-2 font-medium text-text">{t.accountNo || 'N/A'}</td>
                         <td className="py-2 text-text/60">{t.gcashAcct || 'N/A'}</td>
+                        <td className="py-2 text-text/60 font-mono text-xs">{t.gcashReference || '-'}</td>
                         <td className="py-2 text-text/60 text-right">{formatCurrency(parseNum(t.amount))}</td>
                       </tr>
                     ))}
                     {recentEloadTransactions.length === 0 && (
                       <tr>
-                        <td colSpan={3} className="py-8 text-center text-text/40">No E-Load transactions yet</td>
+                        <td colSpan={4} className="py-8 text-center text-text/40">No E-Load transactions yet</td>
                       </tr>
                     )}
                   </tbody>
