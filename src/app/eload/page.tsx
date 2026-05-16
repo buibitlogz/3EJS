@@ -404,24 +404,6 @@ export default function ELoadPage() {
                     <p className="text-xs text-text/40 uppercase tracking-wider mb-1">Amount</p>
                     <p className="font-semibold text-emerald-600">₱{(viewingTransaction.amount || 0).toLocaleString()}</p>
                   </div>
-                  {viewingTransaction.incentive !== undefined && (
-                    <div className="rounded-xl p-3 border border-border bg-purple-500/5">
-                      <p className="text-xs text-text/40 uppercase tracking-wider mb-1">Incentive</p>
-                      <p className="font-bold text-purple-600">₱{viewingTransaction.incentive}</p>
-                    </div>
-                  )}
-                  {viewingTransaction.retailer !== undefined && (
-                    <div className="rounded-xl p-3 border border-border bg-orange-500/5">
-                      <p className="text-xs text-text/40 uppercase tracking-wider mb-1">Retailer</p>
-                      <p className="font-medium text-orange-600">₱{viewingTransaction.retailer}</p>
-                    </div>
-                  )}
-                  {viewingTransaction.dealer !== undefined && (
-                    <div className="rounded-xl p-3 border border-border bg-teal-500/5">
-                      <p className="text-xs text-text/40 uppercase tracking-wider mb-1">Dealer</p>
-                      <p className="font-medium text-teal-600">₱{viewingTransaction.dealer}</p>
-                    </div>
-                  )}
                 </div>
 
                 {viewingTransaction.accountNo && (
