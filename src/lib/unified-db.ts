@@ -268,14 +268,25 @@ export async function createInstallation(data: Partial<InstallationRow>): Promis
   } as InstallationRow;
 
   if (useSupabase()) {
-    const sbData = fromCamelCase(row as unknown as Record<string, unknown>, INSTALLATION_COLUMNS_SB);
-    await supabaseFetch('installations', {
-      method: 'POST',
-      body: sbData,
-    });
+    try {
+      const sbData = fromCamelCase(row as unknown as Record<string, unknown>, INSTALLATION_COLUMNS_SB);
+      await supabaseFetch('installations', {
+        method: 'POST',
+        body: sbData,
+      });
+    } catch (error) {
+      console.warn('[DB] Supabase write failed, falling back to IndexedDB only:', error);
+    }
   }
 
-  await localDb.put('installations', row);
+  if (typeof window !== 'undefined' && window.indexedDB) {
+    try {
+      await localDb.put('installations', row);
+    } catch (error) {
+      console.warn('[DB] IndexedDB write failed:', error);
+    }
+  }
+  
   return row;
 }
 

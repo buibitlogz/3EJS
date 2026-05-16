@@ -16,6 +16,9 @@ function toCamelCaseInstallation(data: Record<string, unknown>): Record<string, 
     doublesidedtape: 'doubleSidedTape', cabletiewrap: 'cableTieWrap',
     monthinstalled: 'monthInstalled', yearinstalled: 'yearInstalled',
     loadexpire: 'loadExpire', notifstatus: 'notifyStatus', loadstatus: 'loadStatus',
+    houseLat: 'houseLatitude', houseLong: 'houseLongitude',
+    startLocation: 'startLocation', endLocation: 'endLocation',
+    assignedTechnicians: 'assignedTechnician',
   };
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
