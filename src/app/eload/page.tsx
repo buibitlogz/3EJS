@@ -126,7 +126,6 @@ export default function ELoadPage() {
     time: new Date().toTimeString().slice(0, 5),
     amount: 700,
     accountNo: '',
-    technician: user?.username || '',
     remarks: '',
     markedUp: AMOUNT_INCENTIVE_MAP[700].markedUp,
     retailer: AMOUNT_INCENTIVE_MAP[700].retailer,
@@ -162,7 +161,6 @@ export default function ELoadPage() {
       time: formData.time,
       amount: formData.amount,
       accountNo: formData.accountNo,
-      technician: formData.technician,
       remarks: formData.remarks,
       markedUp: formData.markedUp,
       retailer: formData.retailer,
@@ -180,7 +178,6 @@ export default function ELoadPage() {
       time: new Date().toTimeString().slice(0, 5),
       amount: 700,
       accountNo: '',
-      technician: user?.username || '',
       remarks: '',
       markedUp: AMOUNT_INCENTIVE_MAP[700].markedUp,
       retailer: AMOUNT_INCENTIVE_MAP[700].retailer,
@@ -453,14 +450,14 @@ export default function ELoadPage() {
                       setEditingTransaction(viewingTransaction);
                       const amt = viewingTransaction.amount || 710;
                       const computed = AMOUNT_INCENTIVE_MAP[amt] || { markedUp: viewingTransaction.markedUp || 0, retailer: viewingTransaction.retailer || 0, dealer: viewingTransaction.dealer || 0, incentive: viewingTransaction.incentive || 0 };
-                      setFormData({
+setFormData({
+                        ...formData,
                         gcashAcct: viewingTransaction.gcashAcct || '',
                         dateLoaded: viewingTransaction.dateLoaded || new Date().toISOString().split('T')[0],
                         gcashReference: viewingTransaction.gcashReference || '',
                         time: viewingTransaction.time || '',
                         amount: amt,
                         accountNo: viewingTransaction.accountNo || '',
-                        technician: viewingTransaction.technician || '',
                         remarks: viewingTransaction.remarks || '',
                         markedUp: viewingTransaction.markedUp ?? computed.markedUp,
                         retailer: viewingTransaction.retailer ?? computed.retailer,
@@ -536,27 +533,15 @@ export default function ELoadPage() {
                   </div>
                 </div>
                 {/* Auto-computed read-only fields */}
-                <div className="grid grid-cols-4 gap-3 p-3 rounded-xl bg-background border border-border">
+                <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-background border border-border">
                   <div>
                     <p className="text-xs text-text/40 uppercase tracking-wider mb-1">Marked Up</p>
                     <p className="font-semibold text-blue-600">₱{formData.markedUp}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-text/40 uppercase tracking-wider mb-1">Retailer</p>
-                    <p className="font-semibold text-orange-600">₱{formData.retailer}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-text/40 uppercase tracking-wider mb-1">Dealer</p>
-                    <p className="font-semibold text-teal-600">₱{formData.dealer}</p>
-                  </div>
-                  <div>
                     <p className="text-xs text-text/40 uppercase tracking-wider mb-1">Incentive</p>
                     <p className="font-bold text-purple-600">₱{formData.incentive}</p>
                   </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-text/50 uppercase tracking-wider mb-1">Technician</label>
-                  <input type="text" value={formData.technician} onChange={(e) => setFormData({ ...formData, technician: e.target.value })} className="w-full px-3 py-2.5 rounded-xl bg-background border border-border text-text focus:outline-none focus:ring-2 focus:ring-primary/30" required />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-text/50 uppercase tracking-wider mb-1">Remarks</label>
