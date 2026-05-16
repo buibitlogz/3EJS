@@ -45,6 +45,7 @@ interface Installation {
   subscriberName: string;
   accountNumber: string;
   contactNumber1: string;
+  address: string;
   assignedTechnician: string;
   status: string;
   created_at?: string;
@@ -160,20 +161,22 @@ export default function ReportingPage() {
         subscriberName: String(inst.subscriberName ?? ''),
         accountNumber: String(inst.accountNumber ?? '').replace(/\.0$/, ''),
         contactNumber1: String(inst.contactNumber1 ?? ''),
+        address: String(inst.address ?? ''),
         assignedTechnician: String(inst.assignedTechnician ?? ''),
         status: String(inst.status ?? 'pending'),
         created_at: String(inst.created_at ?? ''),
       }));
       
-      const mappedHistorical = historicalDataRaw.map((inst: Record<string, unknown>) => ({
+const mappedHistorical = historicalDataRaw.map((inst: Record<string, unknown>) => ({
         id: String(inst.id ?? ''),
         no: String(inst.joNumber ?? ''),
         dateInstalled: (String(inst.dateInstalled ?? '') || '').split('T')[0],
         subscriberName: String(inst.subscriberName ?? ''),
         accountNumber: String(inst.accountNumber ?? '').replace(/\.0$/, ''),
         contactNumber1: String(inst.contactNumber1 ?? ''),
+        address: String(inst.address ?? ''),
         assignedTechnician: String(inst.assignedTechnician ?? ''),
-        status: String(inst.status ?? 'completed'), // Historical data is always completed
+        status: String(inst.status ?? 'completed'),
         created_at: String(inst.createdAt ?? ''),
       }));
       
@@ -308,31 +311,10 @@ export default function ReportingPage() {
     const total = filteredInstallations.length;
     const completed = filteredInstallations.filter(i => i.status === 'completed').length;
     const pending = filteredInstallations.filter(i => i.status === 'pending').length;
-    return { total, completed, pending, completionRate: total > 0 ? Math.round((completed / total) * 100) : 0 };
+    return { total, completed, pending };
   }, [filteredInstallations]);
 
-  const dailyBreakdown = useMemo(() => {
-    const days: Record<string, DailyStats> = {};
-    filteredInstallations.forEach(inst => {
-      const date = inst.dateInstalled || inst.created_at?.split('T')[0] || 'Unknown';
-      if (!days[date]) days[date] = { date, total: 0, completed: 0, pending: 0 };
-      days[date].total++;
-      if (inst.status === 'completed') days[date].completed++; else days[date].pending++;
-    });
-    return Object.values(days).sort((a, b) => b.date.localeCompare(a.date));
-  }, [filteredInstallations]);
-
-  const technicianStats = useMemo(() => {
-    const techs: Record<string, { name: string; total: number; completed: number; pending: number }> = {};
-    filteredInstallations.forEach(inst => {
-      (inst.assignedTechnician || 'Unassigned').split('/').map(t => t.trim()).forEach(t => {
-        if (!techs[t]) techs[t] = { name: t, total: 0, completed: 0, pending: 0 };
-        techs[t].total++;
-        if (inst.status === 'completed') techs[t].completed++; else techs[t].pending++;
-      });
-    });
-    return Object.values(techs).sort((a, b) => b.total - a.total);
-  }, [filteredInstallations]);
+  
 
   const filteredELoadRecords = useMemo(() => {
     return eloadRecords.filter(r => {
@@ -420,14 +402,16 @@ return { totalLoads, totalAmount, totalIncentive, totalMarkedUp };
       ` : `
         <div style="display:flex;gap:24px;margin:16px 0;">
           <div><strong>${stats.total}</strong> Total</div>
-          <div><strong>${stats.completionRate}%</strong> Completion Rate</div>
+          <div><strong>${stats.completed}</strong> Completed</div>
+          <div><strong>${stats.pending}</strong> Pending</div>
         </div>
-        <table><thead><tr><th>Date</th><th>Subscriber</th><th>Account</th><th>Technician</th></tr></thead>
+        <table><thead><tr><th>Date</th><th>Subscriber</th><th>Account</th><th>Address</th><th>Contact</th></tr></thead>
         <tbody>${filteredInstallations.map(i => `<tr>
           <td>${formatDisplayDate(i.dateInstalled)}</td>
           <td>${i.subscriberName || '-'}</td>
           <td>${i.accountNumber || '-'}</td>
-          <td>${i.assignedTechnician || '-'}</td>
+          <td>${i.address || '-'}</td>
+          <td>${i.contactNumber1 || '-'}</td>
         </tr>`).join('')}</tbody></table>
       `}
       <p class="footer">Generated on ${new Date().toLocaleDateString()} | 3EJS Tech Reports</p>
@@ -506,67 +490,6 @@ return { totalLoads, totalAmount, totalIncentive, totalMarkedUp };
               <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{getDateRange.label}</h2>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: 'Total Installations', value: stats.total, color: 'text-blue-500' },
-                { label: 'Completed', value: stats.completed, color: 'text-green-500' },
-                { label: 'Pending', value: stats.pending, color: 'text-amber-500' },
-                { label: 'Completion Rate', value: `${stats.completionRate}%`, color: 'text-purple-500' },
-              ].map(s => (
-                <Card key={s.label} className="text-center p-4">
-                  <div className={`text-3xl font-bold ${s.color}`}>{s.value}</div>
-                  <p className="text-sm text-text/50 mt-1">{s.label}</p>
-                </Card>
-              ))}
-            </div>
-
-            {/* Breakdown + Technician */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="p-5">
-                <h3 className="text-base font-bold text-text mb-4">Daily Breakdown</h3>
-                {loading ? <div className="text-center py-8 text-text/40">Loading...</div>
-                  : dailyBreakdown.length === 0 ? <div className="text-center py-8 text-text/40">No data for this period</div>
-                  : (
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {dailyBreakdown.map((day, i) => (
-                        <motion.div key={day.date} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
-                          className="flex items-center justify-between p-3 rounded-lg bg-background">
-                          <span className="text-sm font-medium text-text">{formatDisplayDate(day.date)}</span>
-                          <div className="flex gap-4 text-sm">
-                            <span className="text-green-600">{day.completed} ✓</span>
-                            <span className="text-amber-600">{day.pending} ⏳</span>
-                            <span className="text-text/40">({day.total})</span>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
-              </Card>
-              <Card className="p-5">
-                <h3 className="text-base font-bold text-text mb-4">Technician Performance</h3>
-                {loading ? <div className="text-center py-8 text-text/40">Loading...</div>
-                  : technicianStats.length === 0 ? <div className="text-center py-8 text-text/40">No data for this period</div>
-                  : (
-                    <div className="space-y-3 max-h-64 overflow-y-auto">
-                      {technicianStats.map((tech, i) => (
-                        <motion.div key={tech.name} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
-                          className="p-3 rounded-lg bg-background">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-text text-sm">{tech.name}</span>
-                            <span className="text-xs text-text/50">{tech.total} jobs</span>
-                          </div>
-                          <div className="w-full bg-border rounded-full h-1.5">
-                            <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-1.5 rounded-full"
-                              style={{ width: `${(tech.completed / tech.total) * 100}%` }} />
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
-              </Card>
-            </div>
-
             {/* Installation Records Table */}
             <Card className="!p-0 overflow-hidden">
               <div className="px-5 py-3 border-b border-border">
@@ -582,7 +505,8 @@ return { totalLoads, totalAmount, totalIncentive, totalMarkedUp };
                           <th className="px-4 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider">Date</th>
                           <th className="px-4 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider">Subscriber</th>
                           <th className="px-4 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider">Account</th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider">Technician</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider">Address</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-text/50 uppercase tracking-wider">Contact</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -591,7 +515,8 @@ return { totalLoads, totalAmount, totalIncentive, totalMarkedUp };
                             <td className="px-4 py-3 text-sm text-text/70 text-left">{formatDisplayDate(inst.dateInstalled)}</td>
                             <td className="px-4 py-3 text-sm font-medium text-text text-left">{inst.subscriberName || '-'}</td>
                             <td className="px-4 py-3 text-sm text-text/70 font-mono text-left">{inst.accountNumber || '-'}</td>
-                            <td className="px-4 py-3 text-sm text-text/70 text-left">{inst.assignedTechnician || '-'}</td>
+                            <td className="px-4 py-3 text-sm text-text/70 text-left">{inst.address || '-'}</td>
+                            <td className="px-4 py-3 text-sm text-text/70 text-left">{inst.contactNumber1 || '-'}</td>
                           </tr>
                         ))}
                       </tbody>
