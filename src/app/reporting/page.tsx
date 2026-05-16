@@ -132,6 +132,7 @@ function formatDisplayDate(dateStr: string | number | undefined): string {
 export default function ReportingPage() {
   const { user } = useAuth();
   const [installations, setInstallations] = useState<Installation[]>([]);
+  const [historicalData, setHistoricalData] = useState<Installation[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<ReportPeriod>('weekly');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -146,8 +147,13 @@ export default function ReportingPage() {
 
   const fetchInstallations = useCallback(async () => {
     try {
-      const data = await localDb.getAll<Record<string, unknown>>('installations');
-      const mapped = data.map((inst: Record<string, unknown>) => ({
+      // Fetch from both installations and historicaldata tables
+      const [installData, historicalDataRaw] = await Promise.all([
+        localDb.getAll<Record<string, unknown>>('installations'),
+        localDb.getAll<Record<string, unknown>>('historicaldata')
+      ]);
+      
+      const mappedInstall = installData.map((inst: Record<string, unknown>) => ({
         id: String(inst.id ?? ''),
         no: String(inst.no ?? ''),
         dateInstalled: (String(inst.dateInstalled ?? '') || '').split('T')[0],
@@ -158,7 +164,21 @@ export default function ReportingPage() {
         status: String(inst.status ?? 'pending'),
         created_at: String(inst.created_at ?? ''),
       }));
-      setInstallations(mapped);
+      
+      const mappedHistorical = historicalDataRaw.map((inst: Record<string, unknown>) => ({
+        id: String(inst.id ?? ''),
+        no: String(inst.joNumber ?? ''),
+        dateInstalled: (String(inst.dateInstalled ?? '') || '').split('T')[0],
+        subscriberName: String(inst.subscriberName ?? ''),
+        accountNumber: String(inst.accountNumber ?? '').replace(/\.0$/, ''),
+        contactNumber1: String(inst.contactNumber1 ?? ''),
+        assignedTechnician: String(inst.assignedTechnician ?? ''),
+        status: String(inst.status ?? 'completed'), // Historical data is always completed
+        created_at: String(inst.createdAt ?? ''),
+      }));
+      
+      setInstallations([...mappedInstall, ...mappedHistorical]);
+      setHistoricalData(mappedHistorical);
     } catch (err) {
       console.error('Error fetching installations:', err);
     } finally {
