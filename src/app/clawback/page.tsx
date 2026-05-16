@@ -38,7 +38,6 @@ export default function ClawbackPage() {
   }, [fetchSubscribers]);
 
   const clawbackSubscribers = useMemo(() => {
-    const now = new Date();
     const daysAgo = new Date();
     daysAgo.setDate(daysAgo.getDate() - daysFilter);
 
@@ -67,9 +66,8 @@ export default function ClawbackPage() {
 
       if (!dateInstalled || isNaN(dateInstalled.getTime())) return false;
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const isWithinDays = dateInstalled >= daysAgo && dateInstalled <= today;
+      // Show records installed within the last X days (30/60/90) and not yet loaded
+      const isWithinDays = dateInstalled >= daysAgo;
       const isNotLoaded = sub.loadStatus !== 'Account Loaded';
       const isNotNotified = sub.notifyStatus === 'Not Yet Notified';
       
