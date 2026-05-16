@@ -304,27 +304,49 @@ export async function updateInstallation(id: string, data: Partial<InstallationR
   const updated = { ...existing, ...data, loadExpire: loadExpire || existing.loadExpire, updatedAt: new Date().toISOString() };
 
   if (useSupabase()) {
-    const sbData = fromCamelCase(updated as unknown as Record<string, unknown>, INSTALLATION_COLUMNS_SB);
-    await supabaseFetch('installations', {
-      method: 'PATCH',
-      body: sbData,
-      params: { id: `eq.${id}` },
-    });
+    try {
+      const sbData = fromCamelCase(updated as unknown as Record<string, unknown>, INSTALLATION_COLUMNS_SB);
+      await supabaseFetch('installations', {
+        method: 'PATCH',
+        body: sbData,
+        params: { id: `eq.${id}` },
+      });
+    } catch (error) {
+      console.warn('[DB] Supabase update failed:', error);
+    }
   }
 
-  await localDb.put('installations', updated);
+  if (typeof window !== 'undefined' && window.indexedDB) {
+    try {
+      await localDb.put('installations', updated);
+    } catch (error) {
+      console.warn('[DB] IndexedDB write failed:', error);
+    }
+  }
+  
   return updated;
 }
 
 export async function deleteInstallation(id: string): Promise<boolean> {
   if (useSupabase()) {
-    await supabaseFetch('installations', {
-      method: 'DELETE',
-      params: { id: `eq.${id}` },
-    });
+    try {
+      await supabaseFetch('installations', {
+        method: 'DELETE',
+        params: { id: `eq.${id}` },
+      });
+    } catch (error) {
+      console.warn('[DB] Supabase delete failed:', error);
+    }
   }
 
-  await localDb.remove('installations', id);
+  if (typeof window !== 'undefined' && window.indexedDB) {
+    try {
+      await localDb.remove('installations', id);
+    } catch (error) {
+      console.warn('[DB] IndexedDB remove failed:', error);
+    }
+  }
+  
   return true;
 }
 
@@ -386,14 +408,25 @@ export async function createEload(data: Partial<ELoadRow>): Promise<ELoadRow> {
   } as ELoadRow;
 
   if (useSupabase()) {
-    const sbData = fromCamelCase(row as unknown as Record<string, unknown>, ELOAD_COLUMNS_SB);
-    await supabaseFetch('eload', {
-      method: 'POST',
-      body: sbData,
-    });
+    try {
+      const sbData = fromCamelCase(row as unknown as Record<string, unknown>, ELOAD_COLUMNS_SB);
+      await supabaseFetch('eload', {
+        method: 'POST',
+        body: sbData,
+      });
+    } catch (error) {
+      console.warn('[DB] Supabase write failed, falling back to IndexedDB only:', error);
+    }
   }
 
-  await localDb.put('eload', row);
+  if (typeof window !== 'undefined' && window.indexedDB) {
+    try {
+      await localDb.put('eload', row);
+    } catch (error) {
+      console.warn('[DB] IndexedDB write failed:', error);
+    }
+  }
+  
   return row;
 }
 
@@ -404,27 +437,49 @@ export async function updateEload(id: string, data: Partial<ELoadRow>): Promise<
   const updated = { ...existing, ...data, updatedAt: new Date().toISOString() };
 
   if (useSupabase()) {
-    const sbData = fromCamelCase(updated as unknown as Record<string, unknown>, ELOAD_COLUMNS_SB);
-    await supabaseFetch('eload', {
-      method: 'PATCH',
-      body: sbData,
-      params: { id: `eq.${id}` },
-    });
+    try {
+      const sbData = fromCamelCase(updated as unknown as Record<string, unknown>, ELOAD_COLUMNS_SB);
+      await supabaseFetch('eload', {
+        method: 'PATCH',
+        body: sbData,
+        params: { id: `eq.${id}` },
+      });
+    } catch (error) {
+      console.warn('[DB] Supabase update failed:', error);
+    }
   }
 
-  await localDb.put('eload', updated);
+  if (typeof window !== 'undefined' && window.indexedDB) {
+    try {
+      await localDb.put('eload', updated);
+    } catch (error) {
+      console.warn('[DB] IndexedDB write failed:', error);
+    }
+  }
+  
   return updated;
 }
 
 export async function deleteEload(id: string): Promise<boolean> {
   if (useSupabase()) {
-    await supabaseFetch('eload', {
-      method: 'DELETE',
-      params: { id: `eq.${id}` },
-    });
+    try {
+      await supabaseFetch('eload', {
+        method: 'DELETE',
+        params: { id: `eq.${id}` },
+      });
+    } catch (error) {
+      console.warn('[DB] Supabase delete failed:', error);
+    }
   }
 
-  await localDb.remove('eload', id);
+  if (typeof window !== 'undefined' && window.indexedDB) {
+    try {
+      await localDb.remove('eload', id);
+    } catch (error) {
+      console.warn('[DB] IndexedDB remove failed:', error);
+    }
+  }
+  
   return true;
 }
 
