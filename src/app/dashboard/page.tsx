@@ -101,6 +101,45 @@ export default function DashboardPage() {
       .slice(0, 10);
   }, [installations]);
 
+  const clawbackSubscribers = useMemo(() => {
+    const daysFilter = 60;
+    const daysAgo = new Date();
+    daysAgo.setDate(daysAgo.getDate() - daysFilter);
+
+    return installations.filter(sub => {
+      let dateInstalled: Date | null = null;
+      const raw = sub.dateInstalled;
+
+      if (!raw) return false;
+
+      if (typeof raw === 'number' || /^\d{5,6}$/.test(String(raw).trim())) {
+        const serial = typeof raw === 'number' ? raw : parseInt(String(raw).trim());
+        dateInstalled = new Date((serial - 25569) * 86400 * 1000);
+      } else {
+        const s = String(raw).trim();
+        if (!s) return false;
+        if (/^\d{4}-\d{2}/.test(s)) {
+          dateInstalled = new Date(s.substring(0, 10));
+        } else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+          const parts = s.split('/');
+          dateInstalled = new Date(parseInt(parts[2]), parseInt(parts[0]) - 1, parseInt(parts[1]));
+        } else if (s.includes(' ')) {
+          const datePart = s.replace(/GMT[+-]\d{4}.*/i, '').replace(/\(.*\)/, '').trim();
+          dateInstalled = new Date(datePart);
+        }
+      }
+
+      if (!dateInstalled || isNaN(dateInstalled.getTime())) return false;
+
+      const isWithinDays = dateInstalled >= daysAgo;
+      const isNotNeeded = sub.notifyStatus === 'Not Needed';
+      const isNotified = sub.notifyStatus === 'Notified' || sub.notifyStatus === 'Not Yet Notified';
+      const isNotLoaded = sub.loadStatus !== 'Account Loaded';
+
+      return isWithinDays && !isNotNeeded && isNotified && isNotLoaded;
+    }).slice(0, 20);
+  }, [installations]);
+
   const parseNum = (v: unknown): number => {
     if (typeof v === 'number') return v;
     if (typeof v === 'string') {
@@ -316,7 +355,7 @@ export default function DashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {recentInstallations.map((inst, i) => (
+                    {clawbackSubscribers.map((inst, i) => (
                       <tr key={inst.id || i} onDoubleClick={() => setSelectedItem(inst)} className="border-b border-border/30 hover:bg-primary/5 cursor-pointer">
                         <td className="py-2 font-medium text-text">{inst.subscriberName || 'N/A'}</td>
                         <td className="py-2 text-text/60">{String(inst.accountNumber || '').replace(/\.0$/, '')}</td>
@@ -324,7 +363,7 @@ export default function DashboardPage() {
                         <td className="py-2 text-text/60 max-w-[150px] truncate">{inst.address || '-'}</td>
                       </tr>
                     ))}
-                    {recentInstallations.length === 0 && (
+                    {clawbackSubscribers.length === 0 && (
                       <tr>
                         <td colSpan={4} className="py-8 text-center text-text/40">No subscribers found</td>
                       </tr>

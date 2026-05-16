@@ -12,7 +12,11 @@ const DATA_SOURCE = process.env.DATA_SOURCE || 'supabase';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-const useSupabase = () => DATA_SOURCE === 'supabase' && SUPABASE_URL && SUPABASE_ANON_KEY;
+const useSupabase = () => {
+  const result = DATA_SOURCE === 'supabase' && SUPABASE_URL && SUPABASE_ANON_KEY;
+  console.log('[DB] useSupabase check:', { DATA_SOURCE, SUPABASE_URL: SUPABASE_URL ? 'set' : 'empty', SUPABASE_ANON_KEY: SUPABASE_ANON_KEY ? 'set' : 'empty', result });
+  return result;
+};
 
 export interface InstallationRow {
   id: string; no?: string; dateInstalled?: string; agentName?: string;
