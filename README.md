@@ -41,31 +41,50 @@ npm run lint
 ## ✨ Features
 
 ### 1. **Dashboard** (`/dashboard`)
-- **Stat Cards**: Total Subscribers, E-Load Incentive, E-Load Transactions, Total Revenue
-- **Subscriber Growth Graph**: Monthly installations with Brush zoom (all-time data)
-- **E-Load Revenue Graph**: Incentive + Total Revenue with Brush zoom
-- **Recent Installations Table**: Latest 10 installations with double-click detail view
-- **Top Technicians**: Ranking by installation count
-- **Load Expiry Tracker**: Upcoming/expiring load subscriptions
+- **Welcome Message**: Dynamic greeting with current year ("Here is your 2026 performance and overview")
+- **Stat Cards with Glow Animations**:
+  - Total Subscribers (Installations + Historical Data combined count)
+  - E-Load Transactions (count)
+  - Active Installations (current installations count)
+  - Historical Records (archived installations count)
+- **Subscriber Installations Graph**: Monthly installations with Brush zoom (all-time data)
+- **Recent E-Load Transactions Table**: Scrollable list showing Account #, Loaded by, GCash Reference, Amount
+- **Clawback Report**: Shows subscribers requiring attention within 90 days with notify/load status filtering
+- **Latest Installations Table**: Most recent 10 installations with double-click detail view
+- **Card Animations**: Subtle glow effects on hover using theme-aware gradients
 
-### 2. **Clawback Dashboard** (`/clawback`)
-- **Risk Monitoring**: Shows subscribers with `loadStatus !== 'Account Loaded'` AND `notifyStatus === 'Not Yet Notified'`
+### 2. **Sidebar Navigation**
+- **Circular Quick Action Buttons**: Side-by-side New Installation and New E-Load buttons
+  - Theme-aware gradient colors (from-primary to-secondary)
+  - Pulsing glow animation
+  - Hover to reveal text labels
+- **Sync Database Button**: Located in footer beside Settings and Logout
+- **Settings Button**: Glowing animation with theme primary color
+- **Logout Button**: Red gradient with modern icon
+- **All buttons have ripple click animations**
+
+### 3. **Clawback Dashboard** (`/clawback`)
+- **Risk Monitoring**: Shows subscribers requiring attention
+  - `loadStatus !== 'Account Loaded'`
+  - `notifyStatus === 'Not Yet Notified'` OR `notifyStatus === 'Notified'`
+  - Within configured days (30/60/90 days)
 - **Time-based Filtering**: 30/60/90 days options
 - **Search Functionality**: Filter by name, account, phone, technician
 - **Address Display**: Full address with blank display for null values
-- **Stat Card**: Single "Risk for Clawback" count
 - **Modal Actions**: Mark as Notified / Mark as Loaded with confirmation dialogs
 
-### 3. **Subscribers Management** (`/subscribers`)
+### 4. **Subscribers Management** (`/subscribers`)
 - **Subscriber List**: Searchable, sortable grid
 - **Detail Modal**: View/edit subscriber information
 - **Date Sort**: Dropdown (Latest First / Oldest First)
 - **Fields**: Name, Account #, Contact, Address, Technician, Load/Notify Status
 - **Status Editing**: Only via Clawback Dashboard (removed from modal)
 
-### 4. **E-Load System** (`/eload`)
+### 5. **E-Load System** (`/eload`)
 - **Transaction Entry**: Amount dropdown with auto-computed values
   - Options: 50 (1 DAY), 200 (7 DAYS), 300 (15 DAYS), 700 (30 DAYS)
+- **Table Columns**: Service, Date, Amount, GCash Reference, Account, Remarks
+  - (Removed: Marked Up, Incentive, Retailer, Dealer)
 - **Formula Auto-computation**:
   | Amount | Marked Up | Retailer | Dealer | Incentive |
   |--------|-----------|----------|--------|-----------|
@@ -76,36 +95,28 @@ npm run lint
 - **TOPER Filter**: Shows only records with "TOPER" in remarks
 - **Search**: Filter by GCash, account, reference number
 - **Duplicate Prevention**: Blocks submission of duplicate reference numbers
-- **Stats**: Total (count+amount), Accounts, Total Incentive
+- **Stats**: Total (count+amount), Accounts
 
-### 5. **Technicians** (`/technicians`)
-- **Technician Directory**: List of all technicians
-- **Installation Detail**: View assigned installations
-- **Performance Metrics**: Installation count tracking
-
-### 6. **New Installations** (`/installations`)
-- **Installation Form**: Manual entry with validation
-- **Technician Input**: Text input + Add button (multi-select, `/`-separated)
-- **Fields**: Subscriber details, modem info, port, coordinates
-- **Removed**: LCP Nap Assignment (deprecated)
+### 6. **Historical Data** (`/historical`)
+- **Archived Installations**: View all historical/archived records
+- **Combined with Active**: Total subscribers count includes both active and historical
 
 ### 7. **Reporting** (`/reporting`)
-- **Tab Switcher**: Subscriber Report | E-Load Report
+- **Simplified Design**: Print-focused layout
 - **Subscriber Report**:
-  - Statistics cards
-  - Daily breakdown
-  - Technician performance
-  - Records table with Print button
-- **E-Load Report**:
-  - Stats cards
-  - Records table (Date, GCash, Account, Amount)
-  - Centered headers
-  - Print button
+  - Address and Contact Number columns
+  - Records from both Installations and Historical Data tables
+- **Print Button**: Print-optimized layout
 
 ### 8. **Settings** (`/settings`)
-- **Backup Tab**: Backfill Formula button for Google Sheets sync
-- **User Management**: Role-based access control
-- **System Configuration**: App settings
+- **Themes Tab**: Theme customizer for app appearance
+- **Data Tab**:
+  - Sync from Supabase
+  - Archive Previous Years
+  - Clear Local Database
+- **Users Tab**: User management with role-based access
+  - Roles: Admin, Technician, E-Load, View Only
+  - Password required for all users (including View Only)
 
 ### 9. **Chatbot Assistant**
 - **Floating Button**: Bottom-right corner
@@ -117,6 +128,16 @@ npm run lint
 - **Larger Icons**: Touch-friendly design
 - **Labels**: Clear navigation text
 
+### 11. **Theme System**
+- **CSS Variable-based**: Full theme synchronization
+- **Light/Dark Mode**: Toggle with system preference detection
+- **Theme Presets**: Multiple color options including ocean-blue, emerald-green, sunset-orange, etc.
+
+### 12. **Global Animations**
+- **Ripple Effect**: All buttons have click ripple animation
+- **Glow Effects**: Cards and buttons have subtle pulsing glow on hover
+- **Framer Motion**: Smooth transitions and animations throughout
+
 ---
 
 ## 🛠 Tech Stack
@@ -124,7 +145,7 @@ npm run lint
 ### Frontend
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS with CSS Variables
 - **State Management**: Zustand (IndexedDB persistence)
 - **Animations**: Framer Motion
 - **Charts**: Recharts (with Brush component)
@@ -144,7 +165,6 @@ npm run lint
 ### Deployment
 - **Platform**: Netlify
 - **CI/CD**: Auto-deploy on push to `main`
-- **Environment**: `.env.production`
 
 ---
 
@@ -155,59 +175,68 @@ npm run lint
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── auth/
-│   │   │   │   └── login/route.ts          # Login endpoint
-│   │   │   ├── eload/
-│   │   │   │   └── route.ts                # E-Load CRUD
-│   │   │   ├── installations/
-│   │   │   │   ├── route.ts                # Installations list
-│   │   │   │   └── [id]/route.ts           # Single installation
-│   │   │   └── users/
-│   │   │       └── route.ts                # User management
-│   │   ├── clawback/
-│   │   │   └── page.tsx                    # Clawback dashboard
-│   │   ├── dashboard/
-│   │   │   └── page.tsx                    # Main dashboard
-│   │   ├── eload/
-│   │   │   └── page.tsx                    # E-Load module
-│   │   ├── installations/
-│   │   │   └── page.tsx                    # New installations
-│   │   ├── login/
-│   │   │   └── page.tsx                    # Login page
-│   │   ├── reporting/
-│   │   │   └── page.tsx                    # Reports
-│   │   ├── subscribers/
-│   │   │   └── page.tsx                    # Subscriber list
-│   │   ├── technicians/
-│   │   │   └── page.tsx                    # Technicians
-│   │   └── settings/
-│   │       └── page.tsx                    # Settings
+│   │   │   ├── auth/login/route.ts          # Login endpoint
+│   │   │   ├── eload/route.ts                # E-Load CRUD
+│   │   │   ├── installations/route.ts       # Installations list
+│   │   │   ├── installations/[id]/route.ts    # Single installation
+│   │   │   ├── users/route.ts                # User management
+│   │   │   └── archive/route.ts              # Archive old records
+│   │   ├── clawback/page.tsx                 # Clawback dashboard
+│   │   ├── dashboard/page.tsx               # Main dashboard
+│   │   ├── eload/page.tsx                    # E-Load module
+│   │   ├── historical/page.tsx              # Historical data
+│   │   ├── installations/page.tsx            # New installations
+│   │   ├── login/page.tsx                    # Login page
+│   │   ├── reporting/page.tsx               # Reports
+│   │   ├── subscribers/page.tsx             # Subscriber list
+│   │   ├── settings/page.tsx                 # Settings
+│   │   └── theme/page.tsx                    # Theme settings
 │   ├── components/
 │   │   ├── common/
-│   │   │   ├── ChatAssistant.tsx           # Chatbot component
-│   │   │   ├── MobileNav.tsx               # Mobile navigation
-│   │   │   ├── PageContainer.tsx           # Layout wrapper
-│   │   │   └── RechartsLazy.tsx            # Lazy-loaded charts
-│   │   └── sync/
-│   │       └── SyncProvider.tsx            # Sync context
+│   │   │   ├── ChatAssistant.tsx            # Chatbot component
+│   │   │   ├── ClientRipple.tsx              # Global ripple effect
+│   │   │   ├── Header.tsx                    # Page header
+│   │   │   ├── LayoutWrapper.tsx            # Layout wrapper
+│   │   │   ├── MobileNav.tsx                 # Mobile navigation
+│   │   │   ├── PageContainer.tsx            # Layout wrapper
+│   │   │   ├── RechartsLazy.tsx             # Lazy-loaded charts
+│   │   │   ├── SettingsButton.tsx           # Settings with glow
+│   │   │   ├── Sidebar.tsx                   # Sidebar navigation
+│   │   │   └── SyncButton.tsx                # Sync with Supabase
+│   │   ├── sync/
+│   │   │   └── SyncProvider.tsx              # Sync context
+│   │   └── theme/
+│   │       └── ThemeCustomizer.tsx          # Theme settings
 │   ├── hooks/
-│   │   └── useAuth.ts                      # Authentication hook
+│   │   ├── useAuth.ts                        # Authentication hook
+│   │   ├── useTheme.ts                       # Theme management
+│   │   └── useQuickAction.ts                # Quick action state
 │   ├── lib/
-│   │   ├── types.ts                        # TypeScript interfaces
-│   │   ├── unified-db.ts                   # Database abstraction
-│   │   ├── mappers.ts                      # Data transformation
-│   │   ├── utils.ts                        # Utility functions
-│   │   └── axios.ts                        # HTTP client
-│   └── stores/
-│       ├── subscribersStore.ts             # Subscriber state
-│       ├── eloadStore.ts                   # E-Load state
-│       └── techniciansStore.ts             # Technician state
+│   │   ├── types.ts                         # TypeScript interfaces
+│   │   ├── unified-db.ts                    # Database abstraction
+│   │   ├── supabase.ts                      # Supabase client
+│   │   ├── local-db.ts                       # IndexedDB wrapper
+│   │   ├── mappers.ts                       # Data transformation
+│   │   ├── utils.ts                         # Utility functions
+│   │   ├── auth-utils.ts                    # Auth utilities
+│   │   ├── validation.ts                    # Zod schemas
+│   │   └── axios.ts                         # HTTP client
+│   ├── stores/
+│   │   ├── subscribersStore.ts             # Subscriber state
+│   │   ├── eloadStore.ts                    # E-Load state
+│   │   ├── techniciansStore.ts              # Technician state
+│   │   ├── usersStore.ts                    # Users state
+│   │   └── historicalDataStore.ts          # Historical data state
+│   └── context/
+│       └── AuthContext.tsx                  # Auth provider
 ├── supabase/
-│   └── migration.sql                       # Database migrations
-├── .env.production                         # Environment variables
-├── next.config.ts                          # Next.js config
-├── tailwind.config.ts                      # Tailwind config
-└── tsconfig.json                           # TypeScript config
+│   └── migration.sql                        # Database migrations
+├── public/
+│   └── logo.png                             # App logo
+├── .env.local                               # Environment variables
+├── .env.production                          # Production env
+├── netlify.toml                             # Netlify config
+└── package.json                             # Dependencies
 ```
 
 ---
@@ -221,29 +250,24 @@ npm run lint
 │                      User Interface                          │
 │  (React Components + Zustand Stores)                         │
 └─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
+                               │
+                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   SyncProvider (Context)                     │
-│  - Login sync trigger                                        │
-│  - 5-minute background sync                                  │
-│  - Tab focus sync                                            │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                Unified Database Layer                        │
+│                   Unified Database Layer                     │
 │  - getAllInstallations()                                     │
-│  - getAllELoad()                                             │
+│  - getAllEload()                                             │
+│  - getAllHistoricalData()                                    │
 │  - toCamelCase transformation                                │
+│  - Falls back to IndexedDB on Supabase failure               │
 └─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
+                               │
+                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                   Supabase (PostgreSQL)                      │
-│  - installations                                             │
-│  - eload                                                     │
-│  - users                                                     │
+│  - installations (active records)                            │
+│  - historicaldata (archived records)                         │
+│  - eload (transactions)                                      │
+│  - users (authentication)                                    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -251,12 +275,11 @@ npm run lint
 
 - **Zustand Stores**: Each module has its own store with IndexedDB persistence
 - **Sync Flow**:
-  1. User logs in → `SyncProvider` detects `user.id`
-  2. Checks `sessionStorage('db_synced_session')`
-  3. `syncFromSheets(webappUrl)` → writes to IndexedDB
-  4. Dispatches `db-synced` event (50ms delay)
-  5. All stores + `SheetsContext` re-fetch
-  6. Tab focus / 5-min timer → background sync (no clear)
+  1. User logs in → fetches from Supabase
+  2. Data cached in IndexedDB for offline support
+  3. Sync button triggers manual refresh from Supabase
+  4. Dispatches `db-synced` event
+  5. All stores re-fetch updated data
 
 ---
 
@@ -265,75 +288,78 @@ npm run lint
 ### `installations` Table
 
 ```sql
-id                TEXT PRIMARY KEY
-no                TEXT
-dateInstalled     TEXT           -- Date only (YYYY-MM-DD), no time component
-agentName         TEXT
-joNumber          TEXT
-accountNumber     TEXT
-subscriberName    TEXT
-contactNumber1    TEXT
-contactNumber2    TEXT
-houseLatitude     TEXT           -- GPS coordinates
-houseLongitude    TEXT
-port              TEXT
-napBoxLonglat     TEXT
-assignedTechnician TEXT
-modemSerial       TEXT
-reelNo            TEXT
-startLocation     TEXT
-endLocation       TEXT
-fiberOpticCable   TEXT
-mechanicalConnector TEXT
-sClamp            TEXT
-patchcordApsc     TEXT
-houseBracket      TEXT
-midspan           TEXT
-cableClip         TEXT
-ftthTerminalBox   TEXT
-doubleSidedTape   TEXT
-cableTieWrap      TEXT
-status            TEXT           -- 'pending' | 'completed'
-loadExpire        TEXT
-notifyStatus      TEXT           -- 'Not Yet Notified' | 'Notified'
-loadStatus        TEXT           -- 'Not yet Loaded' | 'Account Loaded'
-address           TEXT
-createdAt         TIMESTAMP
-updatedAt         TIMESTAMP
+id                    TEXT PRIMARY KEY
+no                    TEXT
+dateInstalled         TEXT           -- Date only (YYYY-MM-DD)
+agentName             TEXT
+joNumber              TEXT UNIQUE
+accountNumber         TEXT
+subscriberName        TEXT
+contact1              TEXT
+contact2              TEXT
+address               TEXT
+houselatitude         TEXT           -- GPS coordinates
+houselongitude        TEXT
+port                  TEXT
+technician            TEXT
+modemSerial           TEXT
+reelNum               TEXT
+reelStart             TEXT
+reelEnd               TEXT
+fiberOpticCable       TEXT
+mechConnector         TEXT
+sClamp                TEXT
+patchcordApscsc       TEXT
+houseBracket          TEXT
+midSpan               TEXT
+cableClip             TEXT
+ftthTerminalBox       TEXT
+doubleSidedTape       TEXT
+cableTieWrap          TEXT
+status                TEXT           -- Status values
+loadExpire            TEXT           -- Load expiry date
+notifyStatus          TEXT           -- 'Not Yet Notified' | 'Notified' | 'Not Needed'
+loadStatus            TEXT           -- 'Not yet Loaded' | 'Account Loaded'
+createdAt             TIMESTAMPTZ
+updatedAt             TIMESTAMPTZ
 ```
+
+### `historicaldata` Table
+
+Same structure as installations (minus material columns).
 
 ### `eload` Table
 
 ```sql
-id                TEXT PRIMARY KEY
-dateLoaded        TEXT
-accountNumber     TEXT
-gcashNumber       TEXT
-amount            INTEGER
-markedUp          DECIMAL        -- Markup amount
-incentive         DECIMAL        -- Incentive amount
-retailer          DECIMAL        -- Retailer share
-dealer            DECIMAL        -- Dealer share
-remarks           TEXT           -- "TOPER" flag for filtering
-createdAt         TIMESTAMP
+id                  TEXT PRIMARY KEY
+gcashHandler        TEXT
+dateLoaded          TEXT
+gcashReference      TEXT
+timeLoaded          TEXT
+amount              NUMERIC(10,2)
+accountNumber       TEXT
+markup              NUMERIC(10,2)
+incentive           NUMERIC(10,2)
+retailer            NUMERIC(10,2)
+dealer              NUMERIC(10,2)
+remarks             TEXT           -- "TOPER" flag
+createdAt           TIMESTAMPTZ
+updatedAt           TIMESTAMPTZ
 ```
 
 ### `users` Table
 
 ```sql
-id                TEXT PRIMARY KEY
-email             TEXT UNIQUE
-password          TEXT           -- bcryptjs hash
-name              TEXT
-role              TEXT           -- 'admin' | 'technician' | 'eload' | 'view_only'
-phone             TEXT
-createdAt         TIMESTAMP
-updatedAt         TIMESTAMP
+id                  TEXT PRIMARY KEY
+username            TEXT UNIQUE NOT NULL
+password            TEXT NOT NULL  -- bcrypt hash
+role                TEXT NOT NULL -- 'admin' | 'technician' | 'eload' | 'view_only'
+createdat           TIMESTAMPTZ
 ```
 
 ### RLS Policies
 
-All tables have SELECT, INSERT, UPDATE, DELETE policies for authenticated users.
+All tables have SELECT, INSERT, UPDATE, DELETE policies with `USING (true)` for full access.
 
 ---
 
@@ -344,29 +370,32 @@ All tables have SELECT, INSERT, UPDATE, DELETE policies for authenticated users.
 **POST** `/api/auth/login`
 ```json
 {
-  "email": "admin@example.com",
+  "username": "admin",
   "password": "password123"
 }
 ```
-Response: `{ token: string, user: User }`
+Response: `{ user: { id, username, name, email, role, createdAt } }`
 
 ### Installations
 
-**GET** `/api/installations` - List all installations  
-**POST** `/api/installations` - Create installation  
-**PATCH** `/api/installations/[id]` - Update installation  
-**DELETE** `/api/installations/[id]` - Delete installation
+**GET** `/api/installations` - List all installations
+**POST** `/api/installations` - Create installation
+**PATCH** `/api/installations/[id]` - Update installation
+**DELETE** `/api/installations?id=xxx` - Delete installation
 
 ### E-Load
 
-**GET** `/api/eload` - List transactions  
-**POST** `/api/eload` - Create transaction  
-**PATCH** `/api/eload/[id]` - Update transaction
+**GET** `/api/eload` - List transactions
+**POST** `/api/eload` - Create transaction
+**PATCH** `/api/eload` - Update transaction
+**DELETE** `/api/eload?id=xxx` - Delete transaction
 
 ### Users
 
-**GET** `/api/users` - List users (admin only)  
+**GET** `/api/users` - List users (admin only)
 **POST** `/api/users` - Create user (admin only)
+**PATCH** `/api/users` - Update user (admin only)
+**DELETE** `/api/users?id=xxx` - Delete user (admin only)
 
 ---
 
@@ -383,43 +412,7 @@ Response: `{ token: string, user: User }`
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_key
-JWT_SECRET=your_jwt_secret
-```
-
-### Build Commands
-
-```bash
-npm run build     # Production build
-npm start         # Start production server
-```
-
----
-
-## 📝 Key Implementation Details
-
-### Date Handling
-
-- **Storage**: `YYYY-MM-DD` format (no time component)
-- **Display**: `formatDateDisplay()` handles Excel serial, ISO, and MM/DD/YYYY formats
-- **Fix**: All `.split('T')[0]` to strip time component before parsing
-
-### NULL/Empty Values
-
-- **Display**: Completely blank (empty string `''`), no dashes or placeholders
-- **Example**: `{sub.address || ''}` instead of `{sub.address || '-'}`
-
-### Formula Computation
-
-E-Load amounts auto-compute using hardcoded formula table in `src/stores/eloadStore.ts`:
-
-```typescript
-const AMOUNT_COMPUTED = new Map([
-  [700, { markedUp: 10, retailer: 28, dealer: 21, incentive: 49 }],
-  [300, { markedUp: 10, retailer: 15.2, dealer: 11.4, incentive: 26.6 }],
-  [200, { markedUp: 19, retailer: 8, dealer: 6, incentive: 14 }],
-  [50, { markedUp: 5, retailer: 2, dealer: 1.5, incentive: 3.5 }]
-]);
+DATA_SOURCE=supabase
 ```
 
 ---
@@ -439,22 +432,13 @@ const AMOUNT_COMPUTED = new Map([
 ### Code Style
 
 - **TypeScript**: Strict mode enabled
-- **Formatting**: Prettier + ESLint
 - **Components**: Functional components with hooks
 - **State**: Zustand for global state
-- **API**: Axios with interceptors
+- **Animations**: Framer Motion for complex animations
+- **Styling**: Tailwind CSS with theme-aware CSS variables
 
 ---
 
 ## 📄 License
 
 MIT License - See LICENSE file for details
-
----
-
-## 🤝 Support
-
-For issues or questions:
-- Check `SESSION_SUMMARY.md` for recent changes
-- Review `AGENTS.md` for multi-agent workflow
-- See `ARCHITECTURE.md` for system design
