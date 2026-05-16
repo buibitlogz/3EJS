@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateInstallation } from '@/lib/unified-db';
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const data = await request.json();
     
     const updated = await updateInstallation(id, data);

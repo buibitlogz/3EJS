@@ -291,7 +291,32 @@ export async function createInstallation(data: Partial<InstallationRow>): Promis
 }
 
 export async function updateInstallation(id: string, data: Partial<InstallationRow>): Promise<InstallationRow | undefined> {
-  const existing = await localDb.getById<InstallationRow>('installations', id);
+  let existing: InstallationRow | undefined;
+  
+  if (typeof window !== 'undefined' && window.indexedDB) {
+    try {
+      existing = await localDb.getById<InstallationRow>('installations', id);
+    } catch (error) {
+      console.warn('[DB] IndexedDB read failed:', error);
+    }
+  }
+  
+  if (!existing) {
+    // Fallback to fetching from Supabase if IndexedDB fails
+    if (useSupabase()) {
+      try {
+        const { data: sbData } = await supabaseFetch<InstallationRow>('installations', {
+          params: { id: `eq.${id}`, select: '*' },
+        });
+        if (sbData && sbData.length > 0) {
+          existing = toCamelCaseInstallation(sbData[0] as unknown as Record<string, unknown>) as InstallationRow;
+        }
+      } catch (error) {
+        console.warn('[DB] Supabase read failed:', error);
+      }
+    }
+  }
+  
   if (!existing) return undefined;
 
   let loadExpire = data.loadExpire;
